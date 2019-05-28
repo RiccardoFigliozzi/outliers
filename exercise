@@ -1,0 +1,44 @@
+# libraries we have to open
+library(tidyverse)
+library(outliers)
+
+# read in data
+data_v1 <- read_csv("../input/deputies_dataset.csv")
+data_v2 <- read_csv("../input/dirty_deputies_v2.csv")
+
+# use a box plot to see if we have outliers in the refund_value column
+# of the data_v2 dataset
+ggplot(data_v2, aes(x = "refund_value", y = refund_value))+
+geom_boxplot()
+
+# look for outliers for each different refund description
+
+ggplot(data_v2, aes(refund_description, refund_value))+
+geom_boxplot()+
+coord_flip() # flip the plot
+
+ggplot(data_v2, aes(party_nmembers, refund_value))+
+geom_point()
+
+# get the z-scores for each value in refunt_value
+outlier_scores<- scores(data_v2$refund_value)
+
+# create a logical vector the same length as outlier_scores
+# that is "TRUE" if outlier_scores is greater than 3 or
+# less than negative 3
+is_outlier <- outlier_scores >3 |outlier_scores > -3
+
+# add a column with info whether the refund_value is an outlier
+data_v2$is_outlier <- is_outlier
+
+# plot outliers for each row
+ggplot(data_v2, aes(refund_description, refund_value))+
+geom_boxplot()+
+coord_flip()+
+facet_wrap(~is_outlier)
+
+# create a dataframe with only outliers
+data_v2_outliers <- data_v2[outlier_scores >3 | outlier_scores < -3, ]
+head(data_v2_outliers)
+
+You can find this exercise on Anthony Reese' Kaggle page: https://www.kaggle.com/studentar/kernels?sortBy=voteCount&group=everyone&pageSize=20&userId=1300506&language=R
